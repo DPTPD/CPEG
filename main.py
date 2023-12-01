@@ -1,12 +1,14 @@
 import os.path
 import struct
 
+import numpy
 import numpy as np
 import scipy
 
 import HoloUtils
 import compressor
 import image_based
+import zip_ger_compression
 
 assert os.path.exists("mat_files"), "Missing mat_files folder"
 assert os.path.exists("test"), "Missing test folder"
@@ -33,6 +35,8 @@ def uncompress(input_file, output_file):
 
 def compress_holo(matrix_path: str, out_name: str):
     spec = open_hologram(matrix_path)
+    zip_ger_compression.zip_ger_compression(spec.holo, "sdhfoisfhsidhf")
+    exit(0)
     c = image_based.PNGCompressor()
     c.compress(spec, "test/merged.png")
     new_holo = c.decompress("test/merged.png")
@@ -51,7 +55,7 @@ def open_hologram(path: str) -> compressor.HoloSpec:
     # dist = np.matrix(f['zobj1'][0])  # propogation depth
 
     holo = f['Hol']
-    holo = holo.astype(np.complex64)
+    # holo = holo.astype(np.complex64)
     return compressor.HoloSpec(holo, pp, wlen, dist)
 
 
@@ -71,7 +75,7 @@ def render(holoFile: str):
 
 def main():
     holoFileName = 'mat_files/Hol_2D_dice.mat'
-    render(holoFileName)
+    # render(holoFileName)
     compress_holo(holoFileName, "dice")
 
 
