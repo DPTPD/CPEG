@@ -1,3 +1,4 @@
+import os.path
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -22,9 +23,16 @@ class HoloSpec:
 class Compressor(ABC):
 
     @abstractmethod
-    def compress(self, hologram: HoloSpec, output_path: str):
+    def compress(self, hologram: HoloSpec, output_path: str) -> None:
         pass
 
     @abstractmethod
     def decompress(self, input_path: str) -> HoloSpec:
         pass
+
+    @staticmethod
+    def calculate_ratio(compressed_path: str, uncompressed_path: str) -> float:
+        compressed_len = os.path.getsize(compressed_path)
+        uncompressed_len = os.path.getsize(uncompressed_path)
+        ratio = uncompressed_len / compressed_len
+        return ratio

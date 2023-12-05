@@ -8,7 +8,7 @@ import scipy
 import HoloUtils
 import compressor
 import image_based
-import zip_ger_compression
+import lossless_ger
 
 assert os.path.exists("mat_files"), "Missing mat_files folder"
 assert os.path.exists("test"), "Missing test folder"
@@ -35,7 +35,8 @@ def uncompress(input_file, output_file):
 
 def compress_holo(matrix_path: str, out_name: str):
     spec = open_hologram(matrix_path)
-    zip_ger_compression.zip_ger_compression(spec.holo, "sdhfoisfhsidhf")
+    compressor=lossless_ger.GerCompressor()
+    compressor.compress(spec, "sdhfoisfhsidhf")
     exit(0)
     c = image_based.PNGCompressor()
     c.compress(spec, "test/merged.png")
