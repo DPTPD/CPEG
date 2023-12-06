@@ -17,8 +17,6 @@ def _relative_phase(z: complex, w: complex) -> float:
 class GammaM(ABC):
     @staticmethod
     def bump(z, w) -> float:
-        if z == w:
-            return 1
         s = min(np.abs(z), np.abs(w))
         p = 3
 
