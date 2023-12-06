@@ -20,6 +20,12 @@ class HoloSpec:
                 self.dist == other.dist)
 
 
+class CompareInfo:
+    def __init__(self, ratio: float, similarity: float):
+        self.ratio = ratio
+        self.similarity = similarity
+
+
 class Compressor(ABC):
 
     @abstractmethod
@@ -31,7 +37,7 @@ class Compressor(ABC):
         pass
 
     @staticmethod
-    def calculate_ratio(compressed_path: str, uncompressed_path: str) -> float:
+    def calculate_info(compressed_path: str, uncompressed_path: str) -> float:
         compressed_len = os.path.getsize(compressed_path)
         uncompressed_len = os.path.getsize(uncompressed_path)
         ratio = uncompressed_len / compressed_len

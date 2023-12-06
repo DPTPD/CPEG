@@ -1,5 +1,5 @@
-import zfpy
 import numpy as np
+import zfpy
 
 
 def compress_fpzip(matrix: np.array, precision=0):

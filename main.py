@@ -1,14 +1,14 @@
 import os.path
 import struct
 
-import numpy
 import numpy as np
 import scipy
 
 import HoloUtils
-import compressor
-import image_based
-import lossless_ger
+import methods.lossless.png
+import methods.general.paper_similarity as paper_similarity
+from methods.general import compressor
+from methods.lossless import lossless_ger
 
 assert os.path.exists("mat_files"), "Missing mat_files folder"
 assert os.path.exists("test"), "Missing test folder"
@@ -35,7 +35,7 @@ def uncompress(input_file, output_file):
 
 def compress_holo(matrix_path: str, out_name: str):
     spec = open_hologram(matrix_path)
-    compressor=lossless_ger.GerCompressor()
+    compressor= lossless_ger.GerCompressor()
     compressor.compress(spec, "sdhfoisfhsidhf")
     exit(0)
     c = image_based.PNGCompressor()
@@ -76,8 +76,13 @@ def render(holoFile: str):
 
 def main():
     holoFileName = 'mat_files/Hol_2D_dice.mat'
+    compressor=methods.lossless.png.PNGCompressor()
+    orig=open_hologram(holoFileName)
+    compressor.compress(orig,"pngtest.png")
+    out=compressor.decompress("pngtest.png")
+    print(paper_similarity.Similarity(paper_similarity.GammaM.bump,paper_similarity.GammaR.cos,paper_similarity.GammaA.unique).calc_similarity(orig.holo,out.holo))
     # render(holoFileName)
-    compress_holo(holoFileName, "dice")
+    #compress_holo(holoFileName, "dice")
 
 
 if __name__ == '__main__':

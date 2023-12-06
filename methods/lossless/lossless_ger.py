@@ -2,7 +2,8 @@ import math
 import zlib
 
 import numpy as np
-import compressor
+
+from methods.general import compressor
 
 
 def _complex_to_bits(matrix: np.ndarray):

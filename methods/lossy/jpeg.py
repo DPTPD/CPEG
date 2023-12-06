@@ -3,10 +3,9 @@ import matplotlib
 import numpy as np
 
 import HoloUtils
-import compressor
 import main
-import paper_similarity
-from compressor import HoloSpec
+from methods.general import paper_similarity, compressor
+from methods.general.compressor import HoloSpec
 
 dict_name = 'image_based_compression/'
 
@@ -46,8 +45,8 @@ class JPEGCompressor(compressor.Compressor):
 def main2():
     holoFileName = 'mat_files/Hol_2D_dice.mat'
     x = main.open_hologram(holoFileName)
-    JPEGCompressor().compress(x, "jpegtest.jpg")
-    newHolo = JPEGCompressor().decompress("jpegtest.jpg")
+    JPEGCompressor().compress(x, "../../jpegtest.jpg")
+    newHolo = JPEGCompressor().decompress("../../jpegtest.jpg")
     similarity = paper_similarity.Similarity(paper_similarity.GammaM.bump, paper_similarity.GammaR.cos,
                                              paper_similarity.GammaA.unique)
     print(similarity.calc_similarity(x.holo, newHolo))

@@ -1,10 +1,9 @@
-import pywt
 import numpy as np
+import pywt
 
-import compressor
 import main
-import paper_similarity
-from compressor import HoloSpec
+from methods.general import paper_similarity, compressor
+from methods.general.compressor import HoloSpec
 
 dict_name = 'wavelet_compression/'
 
@@ -39,8 +38,8 @@ class WaveletCompressor(compressor.Compressor):
 def main2():
     holoFileName = 'mat_files/Hol_2D_dice.mat'
     x = main.open_hologram(holoFileName)
-    WaveletCompressor().compress(x, "jpegtest.npz")
-    newHolo = WaveletCompressor().decompress("jpegtest.npz")
+    WaveletCompressor().compress(x, "../../jpegtest.npz")
+    newHolo = WaveletCompressor().decompress("../../jpegtest.npz")
     similarity = paper_similarity.Similarity(paper_similarity.GammaM.bump, paper_similarity.GammaR.cos,
                                              paper_similarity.GammaA.unique)
     print(similarity.calc_similarity(x.holo, newHolo))
