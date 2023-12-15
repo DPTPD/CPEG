@@ -13,7 +13,7 @@ def render_val(val, output_file):
 
 def process_frame(args):
     idx, val = args
-    render_val(val, "frames2/frame%010d.png" % (idx + 10,))
+    render_val(val, f"frames2/frame{idx + 10:010d}.png")
 
 
 def main2():
