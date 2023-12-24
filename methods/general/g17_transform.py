@@ -18,16 +18,17 @@ def _matrix_to_bits(matrix: np.ndarray):
     return arr2
 
 
-def _apply_g17_transformation_to_bits(arr: np.ndarray):
+def _apply_g17_transformation_to_bits(arr: np.ndarray, sh):
     arr = np.transpose(arr)
     temp = arr.reshape((-1, 8))
     temp2 = np.packbits(temp)
-    return temp2
+    return temp2.reshape((sh[0], -1))
 
 
 def apply_g17_transformation(a: np.ndarray):
+    s = a.shape
     test = _matrix_to_bits(a)
-    return _apply_g17_transformation_to_bits(test)
+    return _apply_g17_transformation_to_bits(test, s)
 
 
 class G17Transformer:

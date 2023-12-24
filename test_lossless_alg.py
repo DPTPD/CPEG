@@ -1,4 +1,5 @@
 import os
+import timeit
 
 from methods.lossless.general_algorithms import *
 from methods.lossless.image_algorithms import *
@@ -7,31 +8,25 @@ from methods.general.compressor import Compressor
 from methods.general.compressor import HoloSpec
 from methods.lossless.general_algorithms.general_compressor import GeneralCompressor
 from methods.lossless.image_algorithms.image_compressor import ImageCompressor, PillowCompressor
-from methods.lossless.zfpcompressor import ZfpCompressor
+from methods.lossless.zfp import ZfpCompressor
 import time
 import main
 
 
 def test_compressor(output_dir: str, output_compressed_file: str, compressor: Compressor, similarity: bool,
                     holo_file_name: str, hologram: HoloSpec) -> None:
-    if not os.path.isdir(os.path.join(output_dir, holo_file_name)):
-        os.makedirs(os.path.join(output_dir, holo_file_name))
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
 
-    output_path = os.path.join(output_dir, holo_file_name, output_compressed_file)
-    start_time = time.time()
-    compressor.compress(hologram, output_path)
-    end_time = time.time()
-
+    output_path = os.path.join(output_dir, output_compressed_file)
+    compress_time = timeit.timeit(lambda: compressor.compress(hologram, output_path), number=3)
     ratio = compressor.calculate_info(output_path, holo_file_name)
-
     compressed_len = os.path.getsize(output_path)
     uncompressed_len = os.path.getsize(holo_file_name)
-    # HoloUtils.rate(uncompressed_len, compressed_len)
     holo_original = uncompressed_len
     holo_compressed = compressed_len
     rate = (float(holo_compressed) / float(holo_original)) * 100
-    print(output_compressed_file, "|", end_time - start_time, "|", ratio, "|", f"{(100 - rate):.2f}%", "|",
-          str(int(holo_original / holo_compressed)) + ':1')
+    print(output_compressed_file, "|", compress_time, "|", ratio, "|", f"{(100 - rate):.2f}%")
 
     if similarity:
         start_time = time.time()
@@ -72,15 +67,15 @@ def main3():
                         holo_file_name, hologram)
     # Image based
     for algo, floatizer, g17 in generate_all_image():
-        if g17 == "bits":
-            continue
         algor: PillowCompressor = algo(floatizer, g17)
         test_compressor("compressdir/" + algo.__name__, f"{algo.__name__}_{floatizer}_{str(g17)}.{algor.format_name}",
                         algor, False,
                         holo_file_name, hologram)
     # ZFP
-    algo = ZfpCompressor(0)
     for floatizer, g17 in generate_params():
+        if g17 == "bits":
+            continue
+        algo = ZfpCompressor(floatizer, g17, 0)
         test_compressor("compressdir/" + type(algo).__name__, f"{type(algo).__name__}_{floatizer}_{str(g17)}.bin", algo,
                         False,
                         holo_file_name, hologram)
@@ -88,4 +83,3 @@ def main3():
 
 if __name__ == '__main__':
     main3()
-

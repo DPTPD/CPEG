@@ -9,7 +9,6 @@ import HoloUtils
 from methods.general import compressor
 
 assert os.path.exists("mat_files"), "Missing mat_files folder in "+str(os.listdir("."))
-assert os.path.exists("test"), "Missing test folder"
 
 
 def uncompress(input_file, output_file):
