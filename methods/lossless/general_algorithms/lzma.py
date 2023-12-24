@@ -5,7 +5,7 @@ from typing import Sequence, Mapping, Any
 from methods.lossless.general_algorithms.general_compressor import GeneralCompressor
 
 
-class LZMACompressor(GeneralCompressor):
+class LzmaCompressor(GeneralCompressor):
 
     def __init__(self, floatifier: typing.Literal["in_place", "hstack", "vstack"],
                  g17: typing.Literal[None, "bits", "bytes"], filters: Sequence[Mapping[str, Any]] | None = None):

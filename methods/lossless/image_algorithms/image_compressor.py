@@ -35,7 +35,7 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
                 metadata_bytes = bytes(json.dumps(metadata_dict), "utf-8")
                 # Convert metadata to bytes
                 # Add metadata using TextChunk
-                img.save(output_path, img.format, exif=metadata_bytes)
+                img.save(output_path, img.format, exif=metadata_bytes, lossless=True)
         except Exception as e:
             print(f"Error: {e}")
 

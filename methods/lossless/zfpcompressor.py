@@ -5,7 +5,7 @@ import methods.general.zfp_utils
 from methods.general.compressor import HoloSpec
 
 
-class Zfp(methods.general.compressor.Compressor):
+class ZfpCompressor(methods.general.compressor.Compressor):
 
     def __init__(self, precision: int):
         self.precision = precision
