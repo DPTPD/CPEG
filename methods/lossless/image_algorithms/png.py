@@ -13,4 +13,3 @@ class PngCompressor(PillowCompressor):
                  g17: G17Transformer | typing.Literal[None, "bits", "bytes"],
                  grayscale: bool = False):
         super().__init__(floatifier, g17, [cv2.IMWRITE_PNG_COMPRESSION, 9], "png", grayscale)
-        self.grayscale = grayscale

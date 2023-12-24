@@ -107,6 +107,8 @@ class PillowCompressor(ImageCompressor, abc.ABC):
             img = img.reshape((img.shape[0], -1))
         pil_image = Image.open(input_path)
         metadata: bytes = pil_image.info.get("exif")
+        if metadata is None:
+            metadata = pil_image.app["APP1"]
         if metadata.startswith(b"Exif\x00\x00"):
             metadata = metadata[6:]
         metadata: str = metadata.decode("utf-8")
