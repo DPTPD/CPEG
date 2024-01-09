@@ -1,13 +1,16 @@
 import os
 import timeit
 
+from methods.lossless.fp_algorithms.fp_algorithm import FpAlgorithm
+from methods.lossless.fp_algorithms.fpzip import FpzipCompressor
+from methods.lossless.fp_algorithms.zfp import ZfpCompressor
 from methods.lossless.general_algorithms import *
 from methods.lossless.image_algorithms import *
 from methods.general import paper_similarity
 from methods.general.compressor import Compressor
 from methods.general.compressor import HoloSpec
 from methods.lossless.general_algorithms.general_compressor import GeneralCompressor
-from methods.lossless.image_algorithms.image_compressor import ImageCompressor
+from methods.lossless.image_algorithms.image_compressor import ImageCompressor, PillowCompressor
 import time
 import main
 
@@ -19,6 +22,7 @@ def test_compressor(output_dir: str, output_compressed_file: str, compressor: Co
 
     output_path = os.path.join(output_dir, output_compressed_file)
     compress_time = timeit.timeit(lambda: compressor.compress(hologram, output_path), number=3)
+    decompress_time = timeit.timeit(lambda: compressor.decompress(output_path), number=3)
     ratio = compressor.calculate_info(output_path, holo_file_name)
     compressed_len = os.path.getsize(output_path)
     uncompressed_len = os.path.getsize(holo_file_name)
@@ -50,6 +54,14 @@ def generate_all_image() -> (ImageCompressor, str, str | None):
             yield algo, floatizer, g17
 
 
+def generate_all_fp() -> (FpAlgorithm, str, str | None):
+    for algo in [FpzipCompressor, ZfpCompressor]:
+        for floatizer, g17 in generate_params():
+            if g17 == "bits":
+                continue
+            yield algo, floatizer, g17
+
+
 def generate_all_general() -> (GeneralCompressor, str, str | None):
     for algo in [Bzip2Compressor, GzipCompressor, LzmaCompressor, ZipCompressor, ZstdCompressor]:
         for floatizer, g17 in generate_params():
@@ -59,27 +71,23 @@ def generate_all_general() -> (GeneralCompressor, str, str | None):
 def main3():
     holo_file_name = 'mat_files/Hol_2D_dice.mat'
     hologram = main.open_hologram(holo_file_name)
-    # PngCompressor("vstack","bits",False).compress(hologram,"to_delete.png")
-    # exit(0)
-    # # Algoritmo generici
-    # for algo, floatizer, g17 in generate_all_general():
-    #     test_compressor("compressdir/" + algo.__name__, f"{algo.__name__}_{floatizer}_{str(g17)}.bin",
-    #                     algo(floatizer, g17), False,
-    #                     holo_file_name, hologram)
-    # # Image based
-    # for algo, floatizer, g17 in generate_all_image():
-    #     algor: PillowCompressor = algo(floatizer, g17)
-    #     test_compressor("compressdir/" + algo.__name__, f"{algo.__name__}_{floatizer}_{str(g17)}.{algor.format_name}",
-    #                     algor, False,
-    #                     holo_file_name, hologram)
-    # # ZFP
-    # for floatizer, g17 in generate_params():
-    #     if g17 == "bits":
-    #         continue
-    #     algo = ZfpCompressor(floatizer, g17, 0)
-    #     test_compressor("compressdir/" + type(algo).__name__, f"{type(algo).__name__}_{floatizer}_{str(g17)}.bin", algo,
-    #                     False,
-    #                     holo_file_name, hologram)
+    # Algoritmo generici
+    for algo, floatizer, g17 in generate_all_general():
+        test_compressor("compressdir/" + algo.__name__, f"{algo.__name__}_{floatizer}_{str(g17)}.bin",
+                        algo(floatizer, g17), False,
+                        holo_file_name, hologram)
+    # Image based
+    for algo, floatizer, g17 in generate_all_image():
+        algor: PillowCompressor = algo(floatizer, g17)
+        test_compressor("compressdir/" + algo.__name__, f"{algo.__name__}_{floatizer}_{str(g17)}.{algor.format_name}",
+                        algor, False,
+                        holo_file_name, hologram)
+    # FP algorithms
+    for algo, floatizer, g17 in generate_all_fp():
+        algo = algo(floatizer, g17, 0)
+        test_compressor("compressdir/" + type(algo).__name__, f"{type(algo).__name__}_{floatizer}_{str(g17)}.bin", algo,
+                        False,
+                        holo_file_name, hologram)
 
 
 if __name__ == '__main__':

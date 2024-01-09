@@ -17,4 +17,7 @@ class FpzipCompressor(FpAlgorithm):
         return fpzip.compress(matrix, precision=self.precision)
 
     def _decompress_float_matrix(self, data: bytes) -> np.ndarray:
-        return fpzip.decompress(data)
+        matrix = fpzip.decompress(data)
+        # decomprimere fpzip restituisce sempre un tensore a 4 dimensioni
+        matrix = matrix.reshape([x for x in matrix.shape if x > 1])
+        return matrix
