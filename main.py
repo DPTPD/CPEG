@@ -7,7 +7,7 @@ import scipy
 
 import HoloUtils
 from methods.general import compressor
-
+os.chdir("/home/dar9586/Programmazione/Progetti/Python/CPEG")
 assert os.path.exists("mat_files"), "Missing mat_files folder in "+str(os.listdir("."))
 
 

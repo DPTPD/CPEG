@@ -5,3 +5,5 @@ opencv-python~=4.8.1.78
 pywavelets~=1.5.0
 zfpy~=1.0.0
 zstandard~=0.22.0
+fpzip~=1.2.2
+Pillow~=10.1.0
