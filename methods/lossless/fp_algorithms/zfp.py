@@ -9,8 +9,11 @@ from methods.lossless.fp_algorithms.fp_algorithm import FpAlgorithm
 
 
 class ZfpCompressor(FpAlgorithm):
+    def is_lossless(self) -> bool:
+        return self.precision == -1
+
     def __init__(self, floatifier: Floatifier | typing.Literal["in_place", "hstack", "vstack"],
-                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int):
+                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int = -1):
         super().__init__(floatifier, g17, precision)
 
     def _compress_float_matrix(self, matrix: np.ndarray) -> bytes:

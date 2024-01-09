@@ -13,22 +13,18 @@ class Floatifier:
         if self.floatifier == "in_place":
             return np.ascontiguousarray(mat).view(np.dtype("f" + str(mat.dtype.itemsize // 2)))
         if self.floatifier == "hstack":
-            return np.hstack((np.real(mat), np.imag(mat)))
+            return np.hstack((mat.real, mat.imag))
         if self.floatifier == "vstack":
-            return np.vstack((np.real(mat), np.imag(mat)))
+            return np.vstack((mat.real, mat.imag))
         raise NotImplementedError
 
     def deapply(self, mat: np.ndarray) -> np.ndarray:
         if self.floatifier == "in_place":
             return np.ascontiguousarray(mat).view(np.dtype("c" + str(mat.dtype.itemsize * 2)))
         if self.floatifier == "hstack":
-            split_point = mat.shape[1] // 2
-            real = mat[:, :split_point]
-            imag = mat[:, split_point:]
+            real, imag = np.hsplit(mat, 2)
             return real + 1j * imag
         if self.floatifier == "vstack":
-            split_point = mat.shape[0] // 2
-            real = mat[:split_point, :]
-            imag = mat[split_point:, :]
+            real, imag = np.vsplit(mat, 2)
             return real + 1j * imag
         raise NotImplementedError

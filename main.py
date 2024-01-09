@@ -1,14 +1,13 @@
 import os.path
 import struct
 
-import numpy
 import numpy as np
 import scipy
 
 import HoloUtils
-from methods.general import compressor
-os.chdir("/home/dar9586/Programmazione/Progetti/Python/CPEG")
-assert os.path.exists("mat_files"), "Missing mat_files folder in "+str(os.listdir("."))
+from methods.general.compressor import HoloSpec
+
+assert os.path.exists("mat_files"), "Missing mat_files folder in " + str(os.listdir("."))
 
 
 def uncompress(input_file, output_file):
@@ -30,22 +29,6 @@ def uncompress(input_file, output_file):
             file.write(struct.pack('<2d', x.real, x.imag))
 
 
-def open_hologram(path: str) -> compressor.HoloSpec:
-    f = scipy.io.loadmat(path)  # aprire il file .mat
-    # Per comprimere
-    pp = f['pitch'][0][0]  # pixel pitch
-    wlen = f['wlen'][0][0]  # wavelenght
-    dist = f['zobj'][0][0]  # propogation depth
-    # Per renderizzare
-    # pp = np.matrix(f['pitch'][0])  # pixel pitch
-    # wlen = np.matrix(f['wlen'][0])  # wavelenght
-    # dist = np.matrix(f['zobj1'][0])  # propogation depth
-
-    holo = f['Hol']
-    # holo = holo.astype(np.complex64)
-    return compressor.HoloSpec(holo, pp, wlen, dist)
-
-
 def extract_center_square(matrix: np.ndarray) -> np.ndarray:
     n, m = matrix.shape
     k = min(n, m)
@@ -55,8 +38,6 @@ def extract_center_square(matrix: np.ndarray) -> np.ndarray:
 
 
 def render(holoFile: str):
-    spec = open_hologram(holoFile)
+    spec = HoloSpec.open_hologram(holoFile)
     holo = extract_center_square(spec.holo)
     HoloUtils.hologramReconstruction(holo, spec.pp, spec.dist, spec.wlen)
-
-

@@ -47,3 +47,6 @@ class GeneralCompressor(methods.general.compressor.Compressor, abc.ABC):
         floatified_holo = self.g17.deapply(g17ed_matrix)
         holo = self.floatifier.deapply(floatified_holo)
         return HoloSpec(holo, pp, wlen, dist)
+
+    def is_lossless(self) -> bool:
+        return True

@@ -66,12 +66,12 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
         floatified_holo = self.floatifier.apply(holo)
         g17ed_matrix = self.g17.apply(floatified_holo)
         mat_dtype = g17ed_matrix.dtype
-        g17ed_matrix = np.ascontiguousarray(g17ed_matrix).view(np.uint8)
+        g17ed_matrix = g17ed_matrix.view(np.uint8).copy()
         self.compress_image(g17ed_matrix, hologram.pp, hologram.wlen, hologram.dist, mat_dtype.name, output_path)
 
     def decompress(self, input_path: str) -> HoloSpec:
         g17ed_matrix, pp, wlen, dist, mat_dtype = self.decompress_image(input_path)
-        g17ed_matrix = np.ascontiguousarray(g17ed_matrix).view(np.dtype(mat_dtype))
+        g17ed_matrix = g17ed_matrix.view(np.dtype(mat_dtype)).copy()
         floatified_holo = self.g17.deapply(g17ed_matrix)
         holo = self.floatifier.deapply(floatified_holo)
         return HoloSpec(holo, pp, wlen, dist)

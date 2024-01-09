@@ -32,7 +32,10 @@ def _apply_high_pass_filter(image_fourier, threshold):
     return filtered_image
 
 
-class Fourier(Compressor):
+class FourierCompressor(Compressor):
+    def is_lossless(self) -> bool:
+        return True
+
     def compress(self, hologram: HoloSpec, output_path: str) -> None:
         fourier_holo = np.fft.fftshift(np.fft.fft2(hologram.holo))
         filter_holo = self.pass_filter(fourier_holo, self.threshold)
@@ -59,5 +62,5 @@ class Fourier(Compressor):
 
 if __name__ == '__main__':
     mat: HoloSpec = main.open_hologram('mat_files/Hol_2D_dice.mat')
-    compressor = Fourier(10, ZfpCompressor("in_place", None, 0), True)
+    compressor = FourierCompressor(10, ZfpCompressor("in_place", None, 0), True)
     compressor.compress(mat, "TODELETE.roba")

@@ -9,8 +9,11 @@ from methods.lossless.fp_algorithms.fp_algorithm import FpAlgorithm
 
 
 class FpzipCompressor(FpAlgorithm):
+    def is_lossless(self) -> bool:
+        return self.precision == 0
+
     def __init__(self, floatifier: Floatifier | typing.Literal["in_place", "hstack", "vstack"],
-                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int):
+                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int = 0):
         super().__init__(floatifier, g17, precision)
 
     def _compress_float_matrix(self, matrix: np.ndarray) -> bytes:
@@ -19,5 +22,5 @@ class FpzipCompressor(FpAlgorithm):
     def _decompress_float_matrix(self, data: bytes) -> np.ndarray:
         matrix = fpzip.decompress(data)
         # decomprimere fpzip restituisce sempre un tensore a 4 dimensioni
-        matrix = matrix.reshape([x for x in matrix.shape if x > 1])
+        matrix = matrix.reshape((-1,))
         return matrix

@@ -8,6 +8,8 @@ from methods.lossless.image_algorithms.image_compressor import PillowCompressor
 
 
 class PngCompressor(PillowCompressor):
+    def is_lossless(self) -> bool:
+        return True
 
     def __init__(self, floatifier: Floatifier | typing.Literal["in_place", "hstack", "vstack"],
                  g17: G17Transformer | typing.Literal[None, "bits", "bytes"],

@@ -42,12 +42,18 @@ class FpAlgorithm(Compressor, ABC):
     def compress_float_matrix(self, matrix: np.ndarray) -> bytes:
         floatified_holo = self.floatifier.apply(matrix)
         g17ed_matrix = self.g17.apply(floatified_holo)
-        return self._compress_float_matrix(g17ed_matrix)
+        shape = g17ed_matrix.shape
+        reshaped_matrix = g17ed_matrix.reshape((-1,))
+        final = self._compress_float_matrix(reshaped_matrix)
+        return pickle.dumps((shape, final))
 
     def decompress_float_matrix(self, data: bytes) -> np.ndarray:
-        g17ed_matrix = self._decompress_float_matrix(data)
+        shape, final = pickle.loads(data)
+        reshaped_matrix = self._decompress_float_matrix(final)
+        g17ed_matrix = reshaped_matrix.reshape(shape)
         floatified_holo = self.g17.deapply(g17ed_matrix)
-        return self.floatifier.deapply(floatified_holo)
+        final = self.floatifier.deapply(floatified_holo)
+        return final
 
     @abstractmethod
     def _compress_float_matrix(self, matrix: np.ndarray) -> bytes:

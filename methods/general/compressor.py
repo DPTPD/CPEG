@@ -1,7 +1,7 @@
-import os.path
 from abc import ABC, abstractmethod
 
 import numpy as np
+import scipy
 
 
 class HoloSpec:
@@ -18,6 +18,22 @@ class HoloSpec:
                 self.pp == other.pp and
                 self.wlen == other.wlen and
                 self.dist == other.dist)
+
+    @staticmethod
+    def open_hologram(path: str) -> 'HoloSpec':
+        f = scipy.io.loadmat(path)  # aprire il file .mat
+        # Per comprimere
+        pp = f['pitch'][0][0]  # pixel pitch
+        wlen = f['wlen'][0][0]  # wavelenght
+        dist = f['zobj'][0][0]  # propogation depth
+        # Per renderizzare
+        # pp = np.matrix(f['pitch'][0])  # pixel pitch
+        # wlen = np.matrix(f['wlen'][0])  # wavelenght
+        # dist = np.matrix(f['zobj1'][0])  # propogation depth
+
+        holo = f['Hol']
+        # holo = holo.astype(np.complex64)
+        return HoloSpec(holo, pp, wlen, dist)
 
 
 class CompareInfo:
@@ -36,9 +52,6 @@ class Compressor(ABC):
     def decompress(self, input_path: str) -> HoloSpec:
         pass
 
-    @staticmethod
-    def calculate_info(compressed_path: str, uncompressed_path: str) -> float:
-        compressed_len = os.path.getsize(compressed_path)
-        uncompressed_len = os.path.getsize(uncompressed_path)
-        ratio = uncompressed_len / compressed_len
-        return ratio
+    @abstractmethod
+    def is_lossless(self) -> bool:
+        raise NotImplemented
