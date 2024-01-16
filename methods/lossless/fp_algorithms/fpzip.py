@@ -10,14 +10,14 @@ from methods.lossless.fp_algorithms.fp_algorithm import FpAlgorithm
 
 class FpzipCompressor(FpAlgorithm):
     def is_lossless(self) -> bool:
-        return self.precision == 0
+        return True
 
     def __init__(self, floatifier: Floatifier | typing.Literal["in_place", "hstack", "vstack"],
-                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int = 0):
-        super().__init__(floatifier, g17, precision)
+                 g17: G17Transformer | typing.Literal[None, "bytes"]):
+        super().__init__(floatifier, g17, 0)
 
     def _compress_float_matrix(self, matrix: np.ndarray) -> bytes:
-        return fpzip.compress(matrix, precision=self.precision)
+        return fpzip.compress(matrix)
 
     def _decompress_float_matrix(self, data: bytes) -> np.ndarray:
         matrix = fpzip.decompress(data)
