@@ -13,7 +13,7 @@ class FpzipCompressor(FpAlgorithm):
         return self.precision == 0
 
     def __init__(self, floatifier: Floatifier | typing.Literal["in_place", "hstack", "vstack"],
-                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int = 16):
+                 g17: G17Transformer | typing.Literal[None, "bytes"], precision: int = 0):
         super().__init__(floatifier, g17, precision)
 
     def _compress_float_matrix(self, matrix: np.ndarray) -> bytes:

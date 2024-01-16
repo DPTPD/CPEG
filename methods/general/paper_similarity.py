@@ -1,4 +1,6 @@
+import multiprocessing
 from abc import ABC
+from concurrent import futures
 from typing import Callable
 
 import numpy as np
@@ -71,4 +73,15 @@ class Similarity:
         return self.gamma_M(z, w) * self.gamma_r(z, w) * self.gamma_a(z, w)
 
     def calc_similarity(self, matrix1: np.matrix, matrix2: np.matrix):
-        return np.mean(np.vectorize(self.similarity_score)(matrix1, matrix2))
+        num_processes = multiprocessing.cpu_count()
+        chunks1 = np.array_split(matrix1, num_processes)
+        chunks2 = np.array_split(matrix2, num_processes)
+
+        with futures.ProcessPoolExecutor() as executor:
+            fut = [executor.submit(np.vectorize(self.similarity_score), c1, c2) for c1, c2 in zip(chunks1, chunks2)]
+            results = []
+            for future in futures.as_completed(fut):
+                result_chunk = future.result()
+                results.append(result_chunk)
+        result_matrix = np.concatenate(results, axis=0)
+        return np.mean(result_matrix)
