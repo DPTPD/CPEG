@@ -14,9 +14,9 @@ from methods.lossless.image_algorithms.image_compressor import ImageCompressor
 
 
 class WebpCompressor(ImageCompressor):
-    def decompress_image(self, input_path: str) -> (np.ndarray, float, float, float, str, int, int):
+    def decompress_image(self, input_path: str) -> (np.ndarray, float, float, float, str, int):
         with open(input_path, "rb") as fp:
-            pp, wlen, dist, mat_dtype, webp_image, shape_0, dtype_size = pickle.load(fp)
+            pp, wlen, dist, mat_dtype, webp_image, dtype_size = pickle.load(fp)
         with tempfile.NamedTemporaryFile("wb", suffix=".webp") as fp:
             temp_name = fp.name
         with open(temp_name, "wb") as fp:
@@ -25,12 +25,13 @@ class WebpCompressor(ImageCompressor):
         os.remove(temp_name)
         if not self.png.grayscale:
             img = img.reshape((img.shape[0], -1))
-        return img, pp, wlen, dist, mat_dtype, shape_0, dtype_size
+        return img, pp, wlen, dist, mat_dtype, dtype_size
 
-    def compress_image(self, matrix: np.ndarray, pp: float, wlen: float, dist: float, mat_dtype: str, shape_0: int, dtype_size: int, output_path: str):
+    def compress_image(self, matrix: np.ndarray, pp: float, wlen: float, dist: float, mat_dtype: str, dtype_size: int,
+                       output_path: str):
         with tempfile.NamedTemporaryFile("wb", suffix=".png") as fp:
             png_temp_name = fp.name
-        self.png.compress_image(matrix, pp, wlen, dist, mat_dtype, shape_0,dtype_size, png_temp_name)
+        self.png.compress_image(matrix, pp, wlen, dist, mat_dtype, dtype_size, png_temp_name)
         if self.is_lossless():
             args = f"cwebp -lossless -exact {png_temp_name} -o".split(" ")
         else:
@@ -41,7 +42,7 @@ class WebpCompressor(ImageCompressor):
         with open(output_path, "rb") as fp:
             data = fp.read()
         with open(output_path, "wb") as fp:
-            pickle.dump((pp, wlen, dist, mat_dtype, data, shape_0, dtype_size), fp)
+            pickle.dump((pp, wlen, dist, mat_dtype, data, dtype_size), fp)
 
     def is_lossless(self) -> bool:
         return self.quality > 100

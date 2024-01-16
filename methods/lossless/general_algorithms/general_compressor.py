@@ -34,7 +34,7 @@ class GeneralCompressor(methods.general.compressor.Compressor, abc.ABC):
         holo = hologram.holo
         floatified_holo = self.floatifier.apply(holo)
         g17ed_matrix = self.g17.apply(floatified_holo)
-        data = pickle.dumps((g17ed_matrix, hologram.pp, hologram.wlen, hologram.dist))
+        data = pickle.dumps((g17ed_matrix, hologram.pp, hologram.wlen, hologram.dist, floatified_holo.dtype.itemsize))
         compressed = self.compress_bytes(data)
         with open(output_path, 'wb') as f:
             f.write(compressed)
@@ -43,8 +43,8 @@ class GeneralCompressor(methods.general.compressor.Compressor, abc.ABC):
         with open(input_path, 'rb') as f:
             c = self.decompress_bytes(f.read())
         compressed_data = pickle.loads(c)
-        g17ed_matrix, pp, wlen, dist = compressed_data
-        floatified_holo = self.g17.deapply(g17ed_matrix)
+        g17ed_matrix, pp, wlen, dist, itemsize = compressed_data
+        floatified_holo = self.g17.deapply(g17ed_matrix, itemsize)
         holo = self.floatifier.deapply(floatified_holo)
         return HoloSpec(holo, pp, wlen, dist)
 
