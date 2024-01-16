@@ -11,7 +11,7 @@ dict_name = 'wavelet_compression/'
 class WaveletCompressor(compressor.Compressor):
 
     def is_lossless(self) -> bool:
-        return True
+        return False
 
     def compress(self, hologram: HoloSpec, output_path: str) -> None:
         wavelet = 'db4'
