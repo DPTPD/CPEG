@@ -48,16 +48,17 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
         return struct.unpack("d", struct.pack("<Q", ulong))[0]
 
     @abc.abstractmethod
-    def compress_image(self, matrix: np.ndarray, pp: float, wlen: float, dist: float, mat_dtype: str, output_path: str):
+    def compress_image(self, matrix: np.ndarray, pp: float, wlen: float, dist: float, mat_dtype: str, shape_0: int,
+                       dtype_size: int, output_path: str):
         """
         :param matrix: a u8 matrix
         """
         pass
 
     @abc.abstractmethod
-    def decompress_image(self, input_path: str) -> (np.ndarray, float, float, float, str):
+    def decompress_image(self, input_path: str) -> (np.ndarray, float, float, float, str, int, int):
         """
-        :return: (u8 matrix, pp, wlen, dist,mat_dtype)
+        :return: (u8 matrix, pp, wlen, dist, mat_dtype, shape_0, dtype_size)
         """
         pass
 
@@ -67,12 +68,13 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
         g17ed_matrix = self.g17.apply(floatified_holo)
         mat_dtype = g17ed_matrix.dtype
         g17ed_matrix = g17ed_matrix.view(np.uint8).copy()
-        self.compress_image(g17ed_matrix, hologram.pp, hologram.wlen, hologram.dist, mat_dtype.name, output_path)
+        self.compress_image(g17ed_matrix, hologram.pp, hologram.wlen, hologram.dist, mat_dtype.name,
+                            hologram.holo.shape[0], hologram.holo.dtype.itemsize, output_path)
 
     def decompress(self, input_path: str) -> HoloSpec:
-        g17ed_matrix, pp, wlen, dist, mat_dtype = self.decompress_image(input_path)
+        g17ed_matrix, pp, wlen, dist, mat_dtype, shape_0, dtype_size = self.decompress_image(input_path)
         g17ed_matrix = g17ed_matrix.view(np.dtype(mat_dtype)).copy()
-        floatified_holo = self.g17.deapply(g17ed_matrix)
+        floatified_holo = self.g17.deapply(g17ed_matrix, shape_0, dtype_size)
         holo = self.floatifier.deapply(floatified_holo)
         return HoloSpec(holo, pp, wlen, dist)
 
@@ -88,7 +90,8 @@ class PillowCompressor(ImageCompressor, abc.ABC):
         self.format_name = format_name
         self.params = params
 
-    def compress_image(self, matrix: np.ndarray, pp: float, wlen: float, dist: float, mat_dtype: str, output_path: str):
+    def compress_image(self, matrix: np.ndarray, pp: float, wlen: float, dist: float, mat_dtype: str, shape_0: int,
+                       dtype_size: int, output_path: str):
         merged = matrix
         if not self.grayscale:
             merged = merged.reshape((merged.shape[0], -1, 4))
@@ -96,12 +99,14 @@ class PillowCompressor(ImageCompressor, abc.ABC):
             "pp": str(ImageCompressor._double_to_ulong(pp)),
             "wlen": str(ImageCompressor._double_to_ulong(wlen)),
             "dist": str(ImageCompressor._double_to_ulong(dist)),
-            "dtype": mat_dtype
+            "dtype": mat_dtype,
+            "shape_0": str(shape_0),
+            "dtype_size": str(dtype_size)
         }
         cv2.imwrite(output_path, merged, params=self.params)
         ImageCompressor._add_metadata_to_image(metadata, output_path, output_path)
 
-    def decompress_image(self, input_path: str) -> (np.ndarray, float, float, float, str):
+    def decompress_image(self, input_path: str) -> (np.ndarray, float, float, float, str, int, int):
         img = cv2.imread(input_path, cv2.IMREAD_UNCHANGED)
         if not self.grayscale:
             img = img.reshape((img.shape[0], -1))
@@ -117,4 +122,6 @@ class PillowCompressor(ImageCompressor, abc.ABC):
         pp = ImageCompressor._ulong_to_double(int(metadata["pp"]))
         wlen = ImageCompressor._ulong_to_double(int(metadata["wlen"]))
         dist = ImageCompressor._ulong_to_double(int(metadata["dist"]))
-        return img, pp, wlen, dist, dtype
+        shape_0 = int(metadata["shape_0"])
+        dtype_size = int(metadata["dtype_size"])
+        return img, pp, wlen, dist, dtype, shape_0, dtype_size
