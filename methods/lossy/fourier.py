@@ -1,9 +1,54 @@
+import multiprocessing
+import os.path
 import pickle
+from concurrent import futures
 
+import matplotlib.pyplot as plt
 import numpy as np
 
+from methods.general import paper_similarity
 from methods.general.compressor import Compressor, HoloSpec
+from methods.lossless.fp_algorithms import FpzipCompressor
 from methods.lossless.fp_algorithms.fp_algorithm import FpAlgorithm
+
+
+def calc_mask(shape, center_row, cutoff_frequency, center_col, offset_x):
+    rows, cols = shape
+    mask = np.ones((rows, cols), dtype=np.complex128)
+    for i in range(rows):
+        for j in range(cols):
+            distance = np.sqrt((offset_x + i - center_row) ** 2 + (j - center_col) ** 2)
+
+            if distance > cutoff_frequency:
+                mask[i, j] = 0
+    return mask
+
+
+def _apply_low_pass_filter_par(image_fourier, cutoff_frequency):
+    rows, cols = image_fourier.shape
+    center_row, center_col = rows // 2, cols // 2
+
+    num_processes = multiprocessing.cpu_count()
+    shapes = [x.shape for x in np.array_split(image_fourier, num_processes, axis=0)]
+    offsets = [0] + [x[0] for x in shapes][:-1]
+    for i in range(len(offsets) - 1):
+        offsets[i + 1] = offsets[i] + offsets[i + 1]
+
+    with futures.ProcessPoolExecutor() as executor:
+        fut = [executor.submit(calc_mask, shape, center_row, cutoff_frequency, center_col, offset) for shape, offset in
+               zip(shapes, offsets)]
+        print(fut)
+        results = []
+
+        for future in fut:
+            print(future)
+            result_chunk = future.result()
+            results.append(result_chunk)
+
+    result_matrix = np.concatenate(results, axis=0)
+    filtered_image = image_fourier * result_matrix
+
+    return filtered_image
 
 
 def _apply_low_pass_filter(image_fourier, cutoff_frequency):
@@ -15,8 +60,8 @@ def _apply_low_pass_filter(image_fourier, cutoff_frequency):
             distance = np.sqrt((i - center_row) ** 2 + (j - center_col) ** 2)
             if distance > cutoff_frequency:
                 mask[i, j] = 0
-    filtered_image = image_fourier * mask
 
+    filtered_image = image_fourier * mask
     return filtered_image
 
 
@@ -51,6 +96,6 @@ class FourierCompressor(Compressor):
 
     def __init__(self, threshold: int, float_compressor: FpAlgorithm, use_low_pass_filter: bool = True):
         super().__init__()
-        self.pass_filter = _apply_low_pass_filter if use_low_pass_filter else _apply_high_pass_filter
+        self.pass_filter = _apply_low_pass_filter_par if use_low_pass_filter else _apply_high_pass_filter
         self.threshold = threshold
         self.float_compressor = float_compressor
