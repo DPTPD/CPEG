@@ -1,14 +1,10 @@
 import multiprocessing
-import os.path
 import pickle
 from concurrent import futures
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-from methods.general import paper_similarity
 from methods.general.compressor import Compressor, HoloSpec
-from methods.lossless.fp_algorithms import FpzipCompressor
 from methods.lossless.fp_algorithms.fp_algorithm import FpAlgorithm
 
 
@@ -18,7 +14,6 @@ def calc_mask(shape, center_row, cutoff_frequency, center_col, offset_x):
     for i in range(rows):
         for j in range(cols):
             distance = np.sqrt((offset_x + i - center_row) ** 2 + (j - center_col) ** 2)
-
             if distance > cutoff_frequency:
                 mask[i, j] = 0
     return mask
@@ -27,9 +22,8 @@ def calc_mask(shape, center_row, cutoff_frequency, center_col, offset_x):
 def _apply_low_pass_filter_par(image_fourier, cutoff_frequency):
     rows, cols = image_fourier.shape
     center_row, center_col = rows // 2, cols // 2
-
     num_processes = multiprocessing.cpu_count()
-    shapes = [x.shape for x in np.array_split(image_fourier, num_processes, axis=0)]
+    shapes = [(rows // num_processes + (rows % num_processes > i), cols) for i in range(num_processes)]
     offsets = [0] + [x[0] for x in shapes][:-1]
     for i in range(len(offsets) - 1):
         offsets[i + 1] = offsets[i] + offsets[i + 1]
@@ -37,11 +31,9 @@ def _apply_low_pass_filter_par(image_fourier, cutoff_frequency):
     with futures.ProcessPoolExecutor() as executor:
         fut = [executor.submit(calc_mask, shape, center_row, cutoff_frequency, center_col, offset) for shape, offset in
                zip(shapes, offsets)]
-        print(fut)
         results = []
 
         for future in fut:
-            print(future)
             result_chunk = future.result()
             results.append(result_chunk)
 
