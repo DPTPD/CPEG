@@ -23,15 +23,15 @@ class HoloSpec:
     def open_hologram(path: str) -> 'HoloSpec':
         f = scipy.io.loadmat(path)  # aprire il file .mat
         # Per comprimere
-        pp = f['pitch'][0][0]  # pixel pitch
+        pp = f[[x for x in ('pitch', 'pp') if x in f][0]][0][0]
         wlen = f['wlen'][0][0]  # wavelenght
-        dist = f['zobj'][0][0]  # propogation depth
+        dist = f[[attr for attr in f.keys() if attr.startswith("z")][0]][0][0]  # propogation depth
         # Per renderizzare
         # pp = np.matrix(f['pitch'][0])  # pixel pitch
         # wlen = np.matrix(f['wlen'][0])  # wavelenght
         # dist = np.matrix(f['zobj1'][0])  # propogation depth
 
-        holo = f['Hol']
+        holo = f[[x for x in ('Hol', 'H', 'dh') if x in f][0]]
         # holo = holo.astype(np.complex64)
         return HoloSpec(holo, pp, wlen, dist)
 
