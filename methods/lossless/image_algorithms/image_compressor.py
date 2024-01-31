@@ -80,6 +80,11 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
 
 
 class PillowCompressor(ImageCompressor, abc.ABC):
+
+    @abc.abstractmethod
+    def support_transparency(self) -> bool:
+        pass
+
     def __init__(self, floatifier: Floatifier | typing.Literal["in_place", "hstack", "vstack"],
                  g17: G17Transformer | typing.Literal[None, "bits", "bytes"],
                  params: list,
@@ -94,7 +99,8 @@ class PillowCompressor(ImageCompressor, abc.ABC):
                        dtype_size: int, output_path: str):
         merged = matrix
         if not self.grayscale:
-            merged = merged.reshape((merged.shape[0], -1, 4))
+            pixel_size = 4 if self.support_transparency() else 3
+            merged = merged.reshape((merged.shape[0], -1, pixel_size))
         metadata = {
             "pp": str(ImageCompressor._double_to_ulong(pp)),
             "wlen": str(ImageCompressor._double_to_ulong(wlen)),

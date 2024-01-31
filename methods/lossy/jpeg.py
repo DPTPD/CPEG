@@ -8,6 +8,9 @@ from methods.lossless.image_algorithms.image_compressor import PillowCompressor
 
 
 class JpegCompressor(PillowCompressor):
+    def support_transparency(self) -> bool:
+        return False
+
     def is_lossless(self) -> bool:
         return False
 
