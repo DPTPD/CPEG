@@ -76,6 +76,8 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
         g17ed_matrix = g17ed_matrix.view(np.dtype(mat_dtype)).copy()
         floatified_holo = self.g17.deapply(g17ed_matrix, dtype_size)
         holo = self.floatifier.deapply(floatified_holo)
+        if not self.is_lossless():
+            np.nan_to_num(holo, False, 0.0)
         return HoloSpec(holo, pp, wlen, dist)
 
 
