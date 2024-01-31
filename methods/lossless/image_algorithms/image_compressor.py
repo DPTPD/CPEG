@@ -67,7 +67,7 @@ class ImageCompressor(methods.general.compressor.Compressor, abc.ABC):
         floatified_holo = self.floatifier.apply(holo)
         g17ed_matrix = self.g17.apply(floatified_holo)
         mat_dtype = g17ed_matrix.dtype
-        g17ed_matrix = g17ed_matrix.view(np.uint8).copy()
+        g17ed_matrix = np.ascontiguousarray(g17ed_matrix).view(np.uint8).copy()
         self.compress_image(g17ed_matrix, hologram.pp, hologram.wlen, hologram.dist, mat_dtype.name,
                             floatified_holo.dtype.itemsize, output_path)
 

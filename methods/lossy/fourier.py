@@ -69,7 +69,7 @@ def _apply_high_pass_filter(image_fourier, threshold):
 
 class FourierCompressor(Compressor):
     def is_lossless(self) -> bool:
-        return True
+        return False
 
     def compress(self, hologram: HoloSpec, output_path: str) -> None:
         fourier_holo = np.fft.fftshift(np.fft.fft2(hologram.holo))
