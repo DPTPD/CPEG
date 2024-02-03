@@ -32,10 +32,12 @@ class WebpCompressor(ImageCompressor):
         with tempfile.NamedTemporaryFile("wb", suffix=".png") as fp:
             png_temp_name = fp.name
         self.png.compress_image(matrix, pp, wlen, dist, mat_dtype, dtype_size, png_temp_name)
+
+        prog_name = "libwebp/cwebp.exe" if os.name == 'nt' else "cwebp"
         if self.is_lossless():
-            args = f"cwebp -lossless -exact {png_temp_name} -o".split(" ")
+            args = f"{prog_name} -lossless -exact {png_temp_name} -o".split(" ")
         else:
-            args = f"cwebp -q {self.quality} {png_temp_name} -o".split(" ")
+            args = f"{prog_name} -q {self.quality} {png_temp_name} -o".split(" ")
         args.append(output_path)
         subprocess.run(args, stderr=subprocess.DEVNULL)
         os.remove(png_temp_name)
